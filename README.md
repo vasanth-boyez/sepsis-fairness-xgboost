@@ -1,109 +1,248 @@
-# Evaluating Bias in Early Sepsis Prediction: A Fairness Analysis of a Tuned XGBoost Model
+# 🩺 Evaluating Bias in Early Sepsis Prediction with XGBoost
 
-## Overview
+A healthcare AI project focused on **early sepsis prediction**, **fairness evaluation**, and **model interpretability** using ICU patient data.
 
-This project investigates bias in early sepsis prediction using machine learning in a high-risk healthcare setting. The final selected model is a tuned XGBoost classifier trained on hourly ICU observations. Alongside predictive performance, the project evaluates fairness across gender using equal accuracy, demographic parity, and equal opportunity.
+---
 
-The work was developed as part of an AI Ethics assessment and focuses on an important question: a model may perform reasonably well overall, but does it behave fairly across different groups?
+## 📌 Overview
 
-## Objectives
+Sepsis is a life-threatening medical condition where delayed detection can lead to severe complications or death. In a clinical setting, it is not enough for a machine learning model to perform well overall if it behaves differently across patient groups.
 
-The main objectives of this project are to:
+This project builds and evaluates a **tuned XGBoost classifier** for early sepsis prediction using hourly ICU observations. Alongside predictive performance, the project examines **fairness across gender** using key subgroup fairness criteria and applies **LIME** to explain selected predictions.
 
-- build a binary classification model for early sepsis prediction
-- compare a baseline Random Forest model with XGBoost
-- improve the final model through hyperparameter tuning
-- test an additional SMOTE-based experiment for class balancing
-- evaluate fairness across gender groups
-- use LIME to explain selected individual predictions
+---
 
-## Dataset
+## 🎯 Project Objectives
 
-This project uses the **Prediction of Sepsis** dataset from Kaggle, based on the PhysioNet/Computing in Cardiology 2019 Challenge dataset.
+- Build a binary classification model for **early sepsis prediction**
+- Compare a **baseline Random Forest** model with **XGBoost**
+- Improve model performance through **hyperparameter tuning**
+- Test an additional **SMOTE-based oversampling** experiment
+- Evaluate fairness across gender using:
+  - Equal Accuracy
+  - Demographic Parity
+  - Equal Opportunity
+- Improve transparency with **LIME-based local explanations**
+
+---
+
+## ❓ Why This Project Matters
+
+In healthcare, machine learning errors are not just technical issues. They can affect patient outcomes.
+
+A model that misses genuine sepsis cases may delay clinical recognition and treatment. A model that performs differently across groups may also create **unequal clinical benefit**. This project was built to study all three dimensions together:
+
+- **Performance**
+- **Fairness**
+- **Interpretability**
+
+---
+
+## 🗂 Dataset
+
+This project uses the **Prediction of Sepsis** dataset from Kaggle, based on the **PhysioNet/Computing in Cardiology 2019 Challenge** dataset.
 
 **Dataset link:**  
-`https://www.kaggle.com/datasets/salikhussaini49/prediction-of-sepsis`
+[Prediction of Sepsis - Kaggle](https://www.kaggle.com/datasets/salikhussaini49/prediction-of-sepsis)
 
-> The raw dataset is not included in this repository because of file size limits.
+> The raw dataset is **not included** in this repository because of GitHub file size limits.
 
-## Why Sepsis?
+---
 
-Sepsis was chosen because it is a high-risk healthcare problem where delayed recognition can lead to severe complications or death. That makes it a meaningful setting for an AI ethics project. In this context, fairness matters because a model that misses genuine sepsis cases more often in one group than another may contribute to unequal clinical benefit.
+## 🔄 Project Workflow
 
-## Project Workflow
+```text
+Dataset Loading
+    ↓
+Exploratory Data Analysis
+    ↓
+Missingness Review & Feature Filtering
+    ↓
+Patient-Level Train/Test Split
+    ↓
+Baseline Random Forest
+    ↓
+XGBoost Baseline
+    ↓
+Hyperparameter Tuning
+    ↓
+Final Tuned XGBoost Evaluation
+    ↓
+Fairness Analysis Across Gender
+    ↓
+Additional XGBoost + SMOTE Experiment
+    ↓
+LIME-Based Local Explainability
+```
 
-The project follows this workflow:
+---
 
-1. load and inspect the dataset  
-2. perform exploratory data analysis  
-3. examine class imbalance and missingness  
-4. filter highly sparse features  
-5. split data by `Patient_ID` to avoid leakage  
-6. build a baseline Random Forest model  
-7. switch to XGBoost and tune the final model  
-8. evaluate predictive performance  
-9. evaluate fairness across gender groups  
-10. test an additional XGBoost + SMOTE experiment  
-11. apply LIME for local explainability  
+## 🤖 Final Selected Model
 
-## Final Selected Model
+### Tuned XGBoost Classifier
 
-The final selected model is a **tuned XGBoost classifier**.
+The final selected model was a **tuned XGBoost classifier**, chosen because it produced the strongest overall balance between:
 
-### Final performance on the test set
+- class 1 detection
+- ranking performance
+- fairness analysis suitability
 
-- **Accuracy:** 0.8264
-- **Precision:** 0.0615
-- **Recall:** 0.5722
-- **F1-score:** 0.1110
-- **ROC-AUC:** 0.7763
-- **PR-AUC:** 0.0926
+### Final Test Performance
 
-### Fairness gaps across gender
+| Metric | Value |
+|--------|------:|
+| Accuracy | 0.8264 |
+| Precision | 0.0615 |
+| Recall | 0.5722 |
+| F1-score | 0.1110 |
+| ROC-AUC | 0.7763 |
+| PR-AUC | 0.0926 |
 
-- **Equal Accuracy Gap:** 0.00033
-- **Demographic Parity Gap:** 0.00113
-- **Equal Opportunity Gap:** 0.03345
+### Final Fairness Gaps Across Gender
 
-## Additional Experiment: XGBoost + SMOTE
+| Fairness Metric | Gap |
+|----------------|----:|
+| Equal Accuracy Gap | 0.00033 |
+| Demographic Parity Gap | 0.00113 |
+| Equal Opportunity Gap | 0.03345 |
 
-An additional experiment was carried out using SMOTE to oversample the minority sepsis class before training XGBoost.
+### Key Fairness Insight
 
-Although this version improved accuracy, precision, and F1-score, it reduced recall, ROC-AUC, and PR-AUC when compared with the final tuned XGBoost model. It also produced a mixed fairness outcome.
+The final model was broadly balanced under **equal accuracy** and **demographic parity**, but a modest gap remained under **equal opportunity**, meaning one gender group was slightly less likely to have true sepsis cases correctly identified.
 
-Because of this, the **tuned XGBoost model without SMOTE** was retained as the final model for the project.
+---
 
-## Fairness Evaluation
+## 🧪 Additional Experiment: XGBoost + SMOTE
 
-Fairness was evaluated across **Gender** using three criteria:
+An additional experiment was carried out using **SMOTE** to oversample the minority sepsis class before training XGBoost.
 
-- **Equal Accuracy**
-- **Demographic Parity**
-- **Equal Opportunity**
+Although the SMOTE-based version improved:
+- accuracy
+- precision
+- F1-score
 
-The results showed that the final model was broadly balanced under equal accuracy and demographic parity, but a modest gap remained under equal opportunity. This means that one gender group was slightly less likely to have true sepsis cases correctly identified.
+it reduced:
+- recall
+- ROC-AUC
+- PR-AUC
 
-## Interpretability
+Because this weakened true sepsis detection, the **tuned XGBoost model without SMOTE** remained the final selected model.
 
-To improve transparency, **LIME** was used to explain selected individual predictions from the final tuned XGBoost model. Local explanations were generated for:
+---
 
-- a true positive case
-- a false negative case
-- a false positive case
+## 🔍 Interpretability with LIME
 
-These explanations showed that features such as `ICULOS`, `Hour`, `HR`, `MAP`, and `HospAdmTime` played an important role in the model’s local decision-making.
+To improve transparency, **LIME** was used to inspect selected individual predictions from the final tuned XGBoost model.
 
-## Repository Structure
+Three representative cases were analysed:
+- **True Positive**
+- **False Negative**
+- **False Positive**
+
+Across these local explanations, features such as:
+
+- `ICULOS`
+- `Hour`
+- `HR`
+- `MAP`
+- `HospAdmTime`
+
+appeared repeatedly, suggesting that the model relied strongly on **time-related ICU context** and **cardiovascular instability** when forming predictions.
+
+---
+
+## 📁 Repository Structure
 
 ```text
 sepsis-fairness-xgboost/
 │
 ├── README.md
-├── .gitignore
 ├── requirements.txt
+│
 ├── notebooks/
 │   ├── Early_Sepsis_Prediction.ipynb
 │
 ├── reports/
-│   └── ....
 └── 
+```
+
+---
+
+## 🛠 Tech Stack
+
+- **Python**
+- **Pandas**
+- **NumPy**
+- **Matplotlib**
+- **Scikit-learn**
+- **XGBoost**
+- **imbalanced-learn**
+- **LIME**
+- **Jupyter Notebook**
+
+---
+
+## 🚀 How to Run
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/vasanth-boyez/sepsis-fairness-xgboost.git
+cd sepsis-fairness-xgboost
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Download the dataset
+
+Download the dataset from Kaggle:
+
+[Prediction of Sepsis - Kaggle](https://www.kaggle.com/datasets/salikhussaini49/prediction-of-sepsis)
+
+### 4. Place the dataset in the expected folder
+
+```text
+data/raw/Dataset.csv
+```
+
+### 5. Run the notebook
+
+Open:
+
+```text
+notebooks/01_final_pipeline.ipynb
+```
+
+---
+
+## 📎 Notes on Data Availability
+
+The dataset is not uploaded to this repository because of GitHub size limits and distribution practicality. Please download it manually from Kaggle and place it in the `data/raw/` directory before running the notebooks.
+
+---
+
+## 📄 Report
+
+The full academic report for this project is included in:
+
+```text
+reports/AI_Report_Vasanth.pdf
+```
+
+---
+
+## 💡 Key Takeaway
+
+This project shows that in healthcare AI, **performance alone is not enough**. A model can look strong overall while still creating unequal benefit across groups. For that reason, sepsis prediction was evaluated here through **performance**, **fairness**, and **interpretability** together.
+
+---
+
+## 👨‍💻 Author
+
+**Vasanth Boyez**  
+AI Ethics Project  
+Teesside University
